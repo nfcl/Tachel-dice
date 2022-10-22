@@ -44,9 +44,12 @@
     }
 }
 
-public static class Game_Canvas_GameStateReaderWriter
+/// <summary>
+/// GameCanvasPlayerData的序列化和反序列化类
+/// </summary>
+public static class GameCanvasPlayerDataReaderWriter
 {
-    public static void Write_LocalPlayerData_Root(this Mirror.NetworkWriter writer, Game_Canvas.GameCanvasPlayerData source)
+    public static void Write_GameCanvasPlayerData(this Mirror.NetworkWriter writer, Game_Canvas.GameCanvasPlayerData source)
     {
         if (source is null)
         {
@@ -62,7 +65,7 @@ public static class Game_Canvas_GameStateReaderWriter
         }
     }
 
-    public static Game_Canvas.GameCanvasPlayerData Readn_LocalPlayerData_Root(this Mirror.NetworkReader reader)
+    public static Game_Canvas.GameCanvasPlayerData Read_GameCanvasPlayerData(this Mirror.NetworkReader reader)
     {
         return new Game_Canvas.GameCanvasPlayerData(reader.Read<string>(), reader.Read<int>(),reader.Read<bool>());
     }
