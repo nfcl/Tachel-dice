@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
 {
     private PlayerData[]        _playerData;            //玩家数据显示实体
-    private DiceBoardControl    _diceBoardControl;      //骰子显示实体
+    private GameInfoDisplay    _diceBoardControl;      //骰子显示实体
     private ControlButtons      _controlButtons;        //游戏进程控制按钮
     private GameCanvasState   _state;                 //场景状态
     private Camera              _mainCamera;            //场景主相机
@@ -19,7 +19,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     private void Start()
     {
         _playerData         = new PlayerData[] { new PlayerData(transform.Find("Player1")), new PlayerData(transform.Find("Player2")) };
-        _diceBoardControl   = new DiceBoardControl(transform.Find("Plane"));
+        _diceBoardControl   = new GameInfoDisplay(transform.Find("Plane"));
         _controlButtons     = new ControlButtons(transform.Find("Control"));
         _state              = GameCanvasState.WaitForReady;
         _mainCamera         = Camera.main;
@@ -76,7 +76,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// <param name="value">玩家分数</param>
     public void SetPlayerGrade(bool isHost,int value)
     {
-        _playerData[isHost ? 0 : 1].SetGrade(value);
+        _diceBoardControl.SetGrade(isHost, value);
     }
 
     /// <summary>
@@ -193,45 +193,58 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// </summary>
     private class PlayerData
     {
+        /// <summary>
+        /// 头像图片
+        /// </summary>
         private Image _avatar;
+        /// <summary>
+        /// 名称文本框
+        /// </summary>
         private Text _name;
-        private Text _grade;
 
         public PlayerData(Transform source)
         {
+
             _avatar = source.Find("Avatar/Content").GetComponent<Image>();
+
             _name = source.Find("Name/Text").GetComponent<Text>();
-            _grade = source.Find("Grade/Text").GetComponent<Text>();
         }
 
+        /// <summary>
+        /// 设置头像
+        /// </summary>
+        /// <param name="id"></param>
         public void SetAvatar(int id)
         {
+            //检测输入的头像id合法性
             if (id < 1 || id > Start_Canvas_SettingPannel_Manager.AVATARNUM) return;
+            //从本地读取头像图片
             _avatar.sprite = Resources.Load<Sprite>($"Avatar/{id}");
         }
 
+        /// <summary>
+        /// 设置名称
+        /// </summary>
+        /// <param name="name"></param>
         public void SetName(string name)
         {
-            if (name.Length == 0) return;
             _name.text = name;
         }
 
-        public void SetGrade(int value)
-        {
-            _grade.text = $"得分：{value}";
-        }
-
+        /// <summary>
+        /// 初始化
+        /// </summary>
         public void Init()
         {
             _avatar.sprite = Resources.Load<Sprite>($"Avatar/{1}");
-            _name.text = "";
+            _name.text = "null";
         }
     }
 
     /// <summary>
-    /// 骰子信息显示和放置类
+    /// 游戏相关信息显示类
     /// </summary>
-    private class DiceBoardControl
+    private class GameInfoDisplay
     {
         /// <summary>
         /// 用于显示对应位置骰子放置情况的图片
@@ -251,8 +264,12 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         /// 1-6是对应的骰子面
         /// </summary>
         private Sprite[] _dice_value2Sprite;
+        /// <summary>
+        /// 玩家总分数
+        /// </summary>
+        private Text[] _grade;
 
-        public DiceBoardControl(Transform source)
+        public GameInfoDisplay(Transform source)
         {
             _dice_Image = new Image[18];
             _dice_Button = new Button[18];
@@ -272,10 +289,15 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
                 _dice_value2Sprite[i] = Resources.Load<Sprite>($"Game_Scene/sprite/Dice_{i}");
             }
             _lineGrade_Text = new Text[6];
-            for(int i = 0; i < 6; ++i)
+            for (int i = 0; i < 6; ++i)
             {
                 _lineGrade_Text[i] = source.Find($"").GetComponent<Text>();
             }
+            _grade = new Text[2]
+            {
+                source.Find("Player1/Grade/Text").GetComponent<Text>(),
+                source.Find("Player2/Grade/Text").GetComponent<Text>(),
+            };
         }
 
         /// <summary>
@@ -292,7 +314,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         }
 
         /// <summary>
-        /// 用于SetPutDiceDelegate绑定带参delegate的额外产物
+        /// 用于SetPutDiceDelegate绑定带参delegate
         /// </summary>
         /// <param name="del">需要绑定的委托</param>
         /// <param name="pos">参数</param>
@@ -308,7 +330,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         /// 设置指定位置骰子的点数
         /// </summary>
         /// <param name="pos">指定的位置</param>
-        /// <param name="value">指定的骰子点数</param>
+        /// <param name="value">设置的骰子点数</param>
         public void SetDiceValue(int pos, int value)
         {
             //位置合法性检查
@@ -319,12 +341,26 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
             _dice_Image[pos].sprite = _dice_value2Sprite[value];
         }
 
+        /// <summary>
+        /// 设置指定列的分数
+        /// </summary>
+        /// <param name="linePos">指定的列位置</param>
+        /// <param name="value">设置的分数</param>
         public void SetLineGrade(int linePos, int value)
         {
             if (linePos < 0 || linePos > 5) return;
 
             _lineGrade_Text[linePos].text = value.ToString();
         }
-    }
 
+        /// <summary>
+        /// 设置玩家分数
+        /// </summary>
+        /// <param name="isPlayer1">是玩家1</param>
+        /// <param name="value">要设置的分数</param>
+        public void SetGrade(bool isPlayer1,int value)
+        {
+            _grade[true == isPlayer1 ? 0 : 1].text = $"得分：{value}";
+        }
+    }
 }
