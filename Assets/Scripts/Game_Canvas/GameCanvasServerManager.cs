@@ -1,47 +1,41 @@
 ﻿using UnityEngine;
 using Mirror;
 using Game_Canvas;
+using System;
 
 /// <summary>
 /// 服务端的游戏管理器
-/// 场景物体没有localplayer权限
 /// </summary>
 public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerControlConnect
 {
     /// <summary>
-    /// 网络管理器
+    /// <para/>网络管理器
     /// </summary>
+    [SerializeField]
     private NetworkManager              _networkManager;
     /// <summary>
     /// 场景物体管理器
     /// </summary>
-    private GameCanvasManager         _canvas_Manager;
+    private GameCanvasManager           _canvas_Manager;
     /// <summary>
     /// <para/>房间中的玩家信息
     /// <para/>下标0是房主
     /// </summary>
-    private GameCanvasPlayerData[]    _playerData;
+    private GameCanvasPlayerData[]      _playerData;
     /// <summary>
     /// 游戏进程管理器
     /// </summary>
-    private GameCanvasGameManager     _game_Manager;
-    /// <summary>
-    /// 玩家是否准备
-    /// </summary>
-    private bool                        _isReady;
-
+    private GameCanvasGameManager       _game_Manager;
     /// <summary>
     /// 客户端连接到服务端
     /// </summary>
     public override void OnStartClient()
     {
-        //
-        _isReady = false;
-        //
-        _networkManager = GameObject.Find("NetWorkManager").GetComponent<NetworkManager>();
         //主机玩家创建新房间初始化
         if (true == isServer)
         {
+            //向NetworkServer订阅OnDisconnectedEvent(客户端断开连接)事件
+            NetworkServer.OnDisconnectedEvent += OnServerDisconnect;
             //房间内玩家信息初始化
             _playerData = new GameCanvasPlayerData[2]
             {
@@ -65,6 +59,11 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             CmdUpdateDiceData();
             CmdUpdateGradeData();
         }
+    }
+
+    private void OnServerDisconnect(NetworkConnection conn)
+    {
+
     }
 
     /// <summary>
@@ -236,19 +235,19 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     [ClientRpc]
     public void RpcGameStart()
     {
-        _canvas_Manager.GameStart();
+
     }
 
     [ClientRpc]
     public void RpcGameEnd()
     {
-        _canvas_Manager.GameEnd();
+
     }
 
     [ClientRpc]
-    public void RpcChangeControlButton()
+    public void RpcChangeControlButton(GameCanvasState state)
     {
-        switch (_canvas_Manager.State)
+        switch (state)
         {
             case GameCanvasState.WaitForReady:
                 {
