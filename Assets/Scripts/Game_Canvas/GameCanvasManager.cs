@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
 {
     private        PlayerData[]         _playerData;            //玩家数据显示实体
-    private        GameInfoDisplay      _diceBoardControl;      //骰子显示实体
+    private        GameInfoDisplay      _diceBoardControl;      //游戏相关信息显示实体
     private        ControlButtons       _controlButtons;        //游戏进程控制按钮
     private        Camera               _mainCamera;            //场景主相机
     private static Vector2[]            _canvasToCameraPos;     //对应场景的相机位置
