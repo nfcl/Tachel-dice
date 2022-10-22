@@ -8,21 +8,28 @@ using UnityEngine.UI;
 /// </summary>
 public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
 {
-    private PlayerData[]        _playerData;            //玩家数据显示实体
-    private GameInfoDisplay    _diceBoardControl;      //骰子显示实体
-    private ControlButtons      _controlButtons;        //游戏进程控制按钮
-    private GameCanvasState   _state;                 //场景状态
-    private Camera              _mainCamera;            //场景主相机
+    private        PlayerData[]         _playerData;            //玩家数据显示实体
+    private        GameInfoDisplay      _diceBoardControl;      //骰子显示实体
+    private        ControlButtons       _controlButtons;        //游戏进程控制按钮
+    private        Camera               _mainCamera;            //场景主相机
+    private static Vector2[]            _canvasToCameraPos;     //对应场景的相机位置
 
-    public GameCanvasState    State => _state;
-
-    private void Start()
+    public void Start()
     {
+
         _playerData         = new PlayerData[] { new PlayerData(transform.Find("Player1")), new PlayerData(transform.Find("Player2")) };
+        
         _diceBoardControl   = new GameInfoDisplay(transform.Find("Plane"));
+        
         _controlButtons     = new ControlButtons(transform.Find("Control"));
-        _state              = GameCanvasState.WaitForReady;
+        
         _mainCamera         = Camera.main;
+        
+        _canvasToCameraPos  = new Vector2[] 
+        { 
+            new Vector2(0, 0), 
+            new Vector2(3000, 0) 
+        };
     }
 
     /// <summary>
@@ -33,7 +40,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         //移动相机至游戏界面
         if (_mainCamera.transform.position.x != 3000)
         {
-            _mainCamera.transform.position = new Vector3(3000, 0, 0);
+            _mainCamera.transform.position = _canvasToCameraPos[1];
         }
     }
 
@@ -45,7 +52,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         //移动相机至游戏界面
         if (_mainCamera.transform.position.x != 0)
         {
-            _mainCamera.transform.position = new Vector3(0, 0, 0);
+            _mainCamera.transform.position = _canvasToCameraPos[0];
         }
     }
 
@@ -86,6 +93,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// <param name="data">传入的玩家信息</param>
     public void SetPlayerData(bool IsHost, GameCanvasPlayerData data)
     {
+        //判断是不是传入了一个null
         if (data is null)
         {
             _playerData[IsHost ? 0 : 1].Init();
@@ -131,22 +139,6 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     }
 
     /// <summary>
-    /// 游戏开始
-    /// </summary>
-    public void GameStart()
-    {
-        _state = GameCanvasState.Gaming;
-    }
-
-    /// <summary>
-    /// 游戏结束
-    /// </summary>
-    public void GameEnd()
-    {
-        _state = GameCanvasState.WaitForReady;
-    }
-
-    /// <summary>
     /// 设置提示文本
     /// </summary>
     /// <param name="content">显示内容</param>
@@ -156,7 +148,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     }
 
     /// <summary>
-    /// 控制游戏进程的按钮组类
+    /// 玩家控制游戏进程类
     /// </summary>
     private class ControlButtons
     {
@@ -164,8 +156,6 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         private Button  _exit_Button;       //退出按钮
         private Text    _tip_Text;          //提示文本
 
-        public Button   Start_Button    => _start_Button;
-        public Button   Exit_Button     => _exit_Button;
         public Text     Tip_Text        => _tip_Text;
 
         public ControlButtons(Transform source)
@@ -175,15 +165,28 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
             _tip_Text       = source.Find("Tip").GetComponent<Text>();
         }
 
+
+        /// <summary>
+        /// 监听开始按钮的点击事件
+        /// </summary>
+        /// <param name="del">要设置的委托</param>
         public void SetStartButtonDelegate(StartButtonDel del)
         {
+            //清空原有监听
             _start_Button.onClick.RemoveAllListeners();
+            //添加监听
             _start_Button.onClick.AddListener(() => del());
         }
 
+        /// <summary>
+        /// 监听退出按钮的点击事件
+        /// </summary>
+        /// <param name="del">要设置的委托</param>
         public void SetExitButtonDelegate(ExitButtonDel del)
         {
+            //清空原有监听
             _exit_Button.onClick.RemoveAllListeners();
+            //添加监听
             _exit_Button.onClick.AddListener(() => del());
         }
     }
