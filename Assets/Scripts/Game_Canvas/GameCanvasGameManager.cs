@@ -23,11 +23,10 @@ public class GameCanvasGameManager
         _lineGrades = new int[6];
         //初始化数据
         Init();
-        //设置游戏结束callBack
     }
 
     /// <summary>
-    /// 游戏重置
+    /// 游戏初始化
     /// </summary>
     public void Init()
     {
@@ -43,6 +42,7 @@ public class GameCanvasGameManager
     /// <param name="Player1Start">是玩家1先手</param>
     public void GameStart(bool Player1Start)
     {
+        //设置为先手的回合
         if (Player1Start)
         {
             _state = GameCanvasGameState.Player1Turn;
@@ -53,7 +53,10 @@ public class GameCanvasGameManager
         }
     }
 
-    public void ChangeTurn()
+    /// <summary>
+    /// <para/>切换回合
+    /// </summary>
+    private void ChangeTurn()
     {
         if(_state == GameCanvasGameState.Player1Turn)
         {
@@ -72,27 +75,27 @@ public class GameCanvasGameManager
     /// <returns>返回是否放置成功</returns>
     public bool PutDice(int slotPos)
     {
-        if (slotPos < 9)
-            if (_state != GameCanvasGameState.Player1Turn) return false;
-        else
-            if (_state != GameCanvasGameState.Player2Turn) return false;
-
+        //尝试在{slotPos}放置{_nextPutDiceValue}点数的骰子
         if (PutDice(slotPos, _nextPutDiceValue))
-        {//放置成功
+        {
+            //投掷下一个要放置的骰子
             DrawNextDice();
-
+            //检测是否满足游戏结束条件
             if(true == CheckFull())
             {
+                //根据双方分数判断谁获胜
                 _state = Player1Grade > Player2Grade ? GameCanvasGameState.Player1Win : GameCanvasGameState.Player2Win;
             }
-
+            //切换到对方的回合
+            ChangeTurn();
+            //放置成功
             return true;
         }
         else
-        {//放置失败
+        {
+            //放置失败
             return false;
         }
-
     }
 
     /// <summary>
@@ -103,17 +106,33 @@ public class GameCanvasGameManager
     /// <returns>返回是否放置成功</returns>
     private bool PutDice(int slotPos, int value)
     {
+        //检测放置的位置合法性
         if (slotPos < 0 || slotPos > 17) return false;
+        //检测放置的点数合法性
         if (value < 1 || value > 6) return false;
+        //检测放置位置是否已存在骰子
         if (_diceSlots[slotPos] != 0) return false;
-
+        //判断是否在对应的玩家回合
+        if (slotPos < 9)
+        {
+            //玩家1放置但不在玩家1回合
+            if (_state != GameCanvasGameState.Player1Turn) return false;
+            //擦除玩家2对应列的相同骰子
+            EraseSame(slotPos % 3 + 3, _nextPutDiceValue);
+        } 
+        else
+        {
+            //玩家2放置但不在玩家2回合
+            if (_state != GameCanvasGameState.Player2Turn) return false;
+            //擦除玩家1对应列的相同骰子
+            EraseSame(slotPos % 3 + 0, _nextPutDiceValue);
+        }
+        //在对应位置放置骰子
         _diceSlots[slotPos] = _nextPutDiceValue;
-
-        EraseSame(slotPos % 3 + (slotPos < 9 ? 3 : 0), _nextPutDiceValue);
-
+        //重新计算玩家1和玩家2对应列的分数
         Calculate_lineGrades(slotPos % 3);
         Calculate_lineGrades(slotPos % 3 + 3);
-
+        //返回放置成功
         return true;
     }
 
@@ -150,12 +169,11 @@ public class GameCanvasGameManager
             }
         }
     }
-
+    
     /// <summary>
     /// Calculate_lineGrades用于统计每列骰子对应点数数量的数组
     /// </summary>
     private static int[] _Calculate_lineGrades_ValueNum = new int[7];
-
     /// <summary>
     /// 计算一列的分数
     /// </summary>
@@ -210,23 +228,27 @@ public class GameCanvasGameManager
     /// <returns>返回是否放满了</returns>
     private bool CheckFull()
     {
+        //循环变量声明
         int __CircArg_i;
-
+        //遍历第一个玩家的九个格子
         for (__CircArg_i = 0; __CircArg_i < 9; ++__CircArg_i)
         {
+            //存在空的格子跳过return true
             if (_diceSlots[__CircArg_i] == 0)
                 goto _GOTOTAG_CHECKFULL_ELSE_;
         }
+        //没有空的格子返回满了
         return true;
-
+        //用于goto的tag
     _GOTOTAG_CHECKFULL_ELSE_:
-
+        //遍历第二个玩家的九个格子
         for (__CircArg_i = 9; __CircArg_i < 18; ++__CircArg_i)
         {
+            //存在空的格子直接return false
             if (_diceSlots[__CircArg_i] == 0)
                 return false;
         }
-
+        //没有空的格子返回满了
         return true;
     }
 }

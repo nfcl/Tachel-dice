@@ -126,8 +126,6 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         //尝试在指定位置放置骰子
         if (true == _game_Manager.PutDice(pos))
         {
-            //回合转换
-            _game_Manager.ChangeTurn();
             //更新骰子放置信息
             CmdUpdateDiceData();
             //更新分数信息
