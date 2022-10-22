@@ -361,3 +361,35 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Assets/Mirror
+*.prefab
+/Assets/Player/PlayerManager.cs
+/Assets/Plugins
+/Assets/Resources
+/Assets/Scenes
+/Assets/Scripts/PlayerData.cs
+/Assets/Scripts/Manager.cs
+/Assets/Scripts/DiceControl.cs
+/Assets/Scripts/DiceBoard.cs
+/Assets/Scripts/DeledageDefine.cs
+/Assets/ScriptTemplates
+/Assets/streamingassets
+/Library
+/ProjectSettings
+/Temp
+/UserSettings
+/where-allocations.csproj
+/Unity.Mirror.CodeGen.csproj
+/Telepathy.csproj
+/Tachal dice.sln
+/SimpleWebTransport.csproj
+/packages.config
+/Mirror.Examples.csproj
+/Mirror.Editor.csproj
+/Mirror.csproj
+/Mirror.Components.csproj
+/Mirror.CompilerSymbols.csproj
+/Mirror.Authenticators.csproj
+/kcp2k.csproj
+/Assembly-CSharp.csproj
+/app.config
