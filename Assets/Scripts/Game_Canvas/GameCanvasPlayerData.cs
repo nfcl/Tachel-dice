@@ -34,13 +34,23 @@
         }
 
         /// <summary>
-        /// 玩家准备
+        /// <para/>切换准备状态
+        /// <para/>不带参,切换为反状态
         /// </summary>
-        public void PlayerReady()       => _isReady = true;
+        public bool ChangeReadyState()
+        {
+            _isReady = !_isReady;
+            return _isReady;
+        }
         /// <summary>
-        /// 玩家取消准备
+        /// <para/>切换准备状态
+        /// <para/>带参,切换为参数状态
         /// </summary>
-        public void PlayerDisReady()    => _isReady = false;
+        /// <param name="isReady">是否准备</param>
+        public void ChangeReadyState(bool isReady)
+        {
+            _isReady = isReady;
+        }
     }
 }
 
