@@ -37,10 +37,9 @@
         /// <para/>切换准备状态
         /// <para/>不带参,切换为反状态
         /// </summary>
-        public bool ChangeReadyState()
+        public void ChangeReadyState()
         {
             _isReady = !_isReady;
-            return _isReady;
         }
         /// <summary>
         /// <para/>切换准备状态
