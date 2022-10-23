@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using UnityEngine.UI;
+using System.Runtime.CompilerServices;
 
 public class GameCanvasPlayerManager : NetworkBehaviour
 {
-    private GameCanvasServerManager _manager; //
+    private GameCanvasServerManager _manager;       //
 
-    public bool IsHost => isServer & isClient;     //当前玩家为房主
+    public bool IsHost => isServer & isClient;      //此客户端是否为房主
 
     public override void OnStartClient()
     {
         if (false == isLocalPlayer) return;
-
+        //
         _manager = GameObject.Find("Game_Canvas/ServerManager").GetComponent<GameCanvasServerManager>();
-        //玩家控制连接
+        //玩家控制和场景物体进行连接
         PlayerControlConnect();
-
     }
 
     public void Button_Start()
     {
         if (false == isLocalPlayer) return;
-
-        CmdGameStart();
+        //
+        CmdPlayerReady(IsHost);
     }
 
     public void Button_Exit()
@@ -37,9 +37,9 @@ public class GameCanvasPlayerManager : NetworkBehaviour
     }
 
     [Command]
-    public void CmdGameStart()
+    public void CmdPlayerReady(bool isHost)
     {
-
+        _manager.PlayerReady(isHost);
     }
 
     [Command]
