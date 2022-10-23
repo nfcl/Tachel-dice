@@ -1,6 +1,4 @@
-﻿using Mirror;
-
-namespace n_LocalPlayerData
+﻿namespace n_LocalPlayerData
 {
     public class LocalPlayerData
     {
