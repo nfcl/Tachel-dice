@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Game_Canvas
+﻿namespace Game_Canvas
 {
     public class GameCanvasPlayerData
     {
@@ -89,34 +87,5 @@ namespace Game_Canvas
         {
             _isReady = isReady;
         }
-    }
-}
-
-/// <summary>
-/// GameCanvasPlayerData的序列化和反序列化类
-/// </summary>
-public static class GameCanvasPlayerDataReaderWriter
-{
-    public static void Write_GameCanvasPlayerData(this Mirror.NetworkWriter writer, Game_Canvas.GameCanvasPlayerData source)
-    {
-        if (source is null)
-        {
-            writer.Write("null");
-            writer.Write(1);
-            writer.Write(false);
-            writer.Write(false);
-        }
-        else
-        {
-            writer.Write(source.Name);
-            writer.Write(source.Avatar);
-            writer.Write(source.IsReady);
-            writer.Write(source.IsPlayerExit);
-        }
-    }
-
-    public static Game_Canvas.GameCanvasPlayerData Read_GameCanvasPlayerData(this Mirror.NetworkReader reader)
-    {
-        return new Game_Canvas.GameCanvasPlayerData(reader.Read<string>(), reader.Read<int>(), reader.Read<bool>(), reader.Read<bool>());
     }
 }
