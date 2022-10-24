@@ -14,6 +14,7 @@ public class GameCanvasGameManager
     public int                          NextPutDiceValue        => _nextPutDiceValue;
     public int                          Player1Grade            => _lineGrades[0] + _lineGrades[1] + _lineGrades[2]; 
     public int                          Player2Grade            => _lineGrades[3] + _lineGrades[4] + _lineGrades[5];
+    public bool                         IsGameEnd               => _state == GameCanvasGameState.Player1Win || _state == GameCanvasGameState.Player2Win;
 
     public GameCanvasGameManager()
     {
