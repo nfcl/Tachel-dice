@@ -1,4 +1,5 @@
 ﻿using Game_Canvas;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -144,7 +145,16 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// <param name="content">显示内容</param>
     public void ShowTipText(string content)
     {
-        _controlButtons.Tip_Text.text = content;
+        _controlButtons.Text_Tip.text = content;
+    }
+
+    /// <summary>
+    /// 切换准备按钮
+    /// </summary>
+    /// <param name="isReady">是否准备</param>
+    public void SetReadyState(bool isReady)
+    {
+        _controlButtons.SetReadyState(isReady);
     }
 
     /// <summary>
@@ -152,17 +162,18 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// </summary>
     private class ControlButtons
     {
-        private Button  _start_Button;      //开始按钮
-        private Button  _exit_Button;       //退出按钮
-        private Text    _tip_Text;          //提示文本
+        private Button      _button_Ready;      //准备按钮
+        private Button      _button_Exit;       //退出按钮
+        private Image       _image_Ready;       //准备按钮显示图片
+        private Text        _text_Tip;          //提示文本框
 
-        public Text     Tip_Text        => _tip_Text;
+        public Text         Text_Tip => _text_Tip;
 
         public ControlButtons(Transform source)
         {
-            _start_Button   = source.Find("Start").GetComponent<Button>();
-            _exit_Button    = source.Find("Exit").GetComponent<Button>();
-            _tip_Text       = source.Find("Tip").GetComponent<Text>();
+            _button_Ready   = source.Find("Start").GetComponent<Button>();
+            _button_Exit    = source.Find("Exit").GetComponent<Button>();
+            _text_Tip       = source.Find("Tip").GetComponent<Text>();
         }
 
 
@@ -173,9 +184,9 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         public void SetStartButtonDelegate(StartButtonDel del)
         {
             //清空原有监听
-            _start_Button.onClick.RemoveAllListeners();
+            _button_Ready.onClick.RemoveAllListeners();
             //添加监听
-            _start_Button.onClick.AddListener(() => del());
+            _button_Ready.onClick.AddListener(() => del());
         }
 
         /// <summary>
@@ -185,9 +196,25 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         public void SetExitButtonDelegate(ExitButtonDel del)
         {
             //清空原有监听
-            _exit_Button.onClick.RemoveAllListeners();
+            _button_Exit.onClick.RemoveAllListeners();
             //添加监听
-            _exit_Button.onClick.AddListener(() => del());
+            _button_Exit.onClick.AddListener(() => del());
+        }
+
+        /// <summary>
+        /// 切换准备按钮
+        /// </summary>
+        /// <param name="isReady">是否准备</param>
+        public void SetReadyState(bool isReady)
+        {
+            if(true == isReady)
+            {
+                _image_Ready.sprite = Resources.Load<Sprite>("Game_Scene/sprite/DisReadyButton");
+            }
+            else
+            {
+                _image_Ready.sprite = Resources.Load<Sprite>("Game_Scene/sprite/ReadyButton");
+            }
         }
     }
 
