@@ -1,6 +1,4 @@
-﻿using Mirror;
-
-/// <summary>
+﻿/// <summary>
 /// Game_Canvas中游戏的状态
 /// </summary>
 public enum GameCanvasGameState
