@@ -169,9 +169,9 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     /// <param name="isHost">是否是房主</param>
     /// <param name="playerData">要更改为的玩家信息</param>
     [Command(requiresAuthority = false)]
-    public void CmdPlayerChange(bool isHost, GameCanvasPlayerData playerData)
+    public void CmdPlayerChange(bool isHost, n_LocalPlayerData.Root playerData)
     {
-        _playerData[isHost ? 0 : 1] = playerData;
+        _playerData[isHost ? 0 : 1].SetPlayerInfo(playerData);
     }
 
     /// <summary>
