@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
 using Mirror;
 using Game_Canvas;
-using System;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.CompilerServices;
 
-/// <summary>
-/// 服务端的游戏管理器
-/// </summary>
 public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerControlConnect
 {
     /// <summary>
@@ -26,6 +24,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     /// 游戏进程管理器
     /// </summary>
     private GameCanvasGameManager       _game_Manager;
+
     /// <summary>
     /// 客户端连接到服务端
     /// </summary>
@@ -39,8 +38,8 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             //房间内玩家信息初始化
             _playerData = new GameCanvasPlayerData[2]
             {
-                null,       //null代表没有玩家
-                null,       //null代表没有玩家
+                new GameCanvasPlayerData(),
+                new GameCanvasPlayerData()
             };
             //创建新的游戏进程管理器
             _game_Manager = new GameCanvasGameManager();
@@ -50,7 +49,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         //移动相机至游戏界面
         _canvas_Manager.Goto_GameCanvas();
         //将新的玩家信息添加到服务端的_playerData
-        CmdPlayerChange(isServer, new GameCanvasPlayerData(Tool.JsonReader<n_LocalPlayerData.Root>("LocalPlayerData.json")));
+        CmdPlayerChange(isServer, Tool.JsonReader<n_LocalPlayerData.Root>("LocalPlayerData.json"));
         //在各个客户端重新绘制玩家信息
         CmdDrawPlayerInfo();
         //非主机玩家进入房间时与主机同步
@@ -61,11 +60,6 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         }
     }
 
-    private void OnServerDisconnect(NetworkConnection conn)
-    {
-
-    }
-
     /// <summary>
     /// 客户端与服务端停止连接
     /// </summary>
@@ -73,6 +67,25 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     {
         //移动相机至游戏界面
         _canvas_Manager.Return_MainCanvas();
+    }
+
+    /// <summary>
+    /// 当有客户端断开连接时会在服务端调用这个方法
+    /// </summary>
+    /// <param name="conn">断开的客户端的NetworkConnection</param>
+    private void OnServerDisconnect(NetworkConnection conn)
+    {
+        //服务端已关闭
+        //单此条件时会在以下情况同时出现时中出现错误:
+        //1.房主断开连接
+        if (false == NetworkClient.active) return;
+        //断开连接的是房主的客户端
+        //单此条件时会在以下情况同时出现时中出现错误:
+        //1.有其他玩家客户端连接到房主时
+        //2.房主断开连接
+        if (conn.connectionId == 0) return;
+        //condition : 非房主玩家退出游戏
+        StopConnectServer(false);
     }
 
     /// <summary>
@@ -103,16 +116,56 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     [Server]
     public void StopConnectServer(bool isHost)
     {
-        if(true == isHost)
+        //清除玩家信息
+        //在所有客户端上重新绘制玩家信息
+        if (true == isHost)
         {
-            _playerData[0] = null;
+            _playerData[0].ClearPlayerInfo();
+            RpcDrawPlayerInfo(true, _playerData[0]);
         }
         else
         {
-            _playerData[1] = null;
+            _playerData[1].ClearPlayerInfo();
+            RpcDrawPlayerInfo(false, _playerData[1]);
         }
-        //在所有客户端上重新绘制玩家信息
-        RpcDrawPlayerInfo(isHost, null);
+    }
+
+    /// <summary>
+    /// 指定玩家准备状态切换
+    /// </summary>
+    /// <param name="isHost">指定的玩家</param>
+    [Server]
+    public void PlayerReady(bool isHost)
+    {
+        //切换服务端中的玩家准备状态
+        //切换客户端准备按钮的图片
+        if (true == isHost)
+        {
+            _playerData[0].ChangeReadyState();
+            TargetSetPlayerReadyState(NetworkServer.connections[0], _playerData[0].IsReady);
+        }
+        else
+        {
+            _playerData[1].ChangeReadyState();
+            TargetSetPlayerReadyState(NetworkServer.connections[1], _playerData[1].IsReady);
+        }
+        //计算已准备的人数
+        int ReadyPlayerNum = 0;
+        ReadyPlayerNum += (_playerData[0] is null || _playerData[0].IsReady) ? 0 : 1;
+        ReadyPlayerNum += (_playerData[1] is null || _playerData[1].IsReady) ? 0 : 1;
+        //判断是否都准备好了
+        if (2 != ReadyPlayerNum)
+        {
+            //更改提示信息为准备好的人数
+            RpcShowTipText($"当前已有\n{ReadyPlayerNum}/2\n个玩家已准备");
+        }
+        else
+        {
+            //隐藏准备按钮
+
+            //切换回合
+
+        }
     }
 
     /// <summary>
@@ -130,7 +183,6 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             //更新分数信息
             CmdUpdateGradeData();
             //检测是否结束游戏
-
         }
     }
 
@@ -169,9 +221,9 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     /// <param name="isHost">是否是房主</param>
     /// <param name="playerData">要更改为的玩家信息</param>
     [Command(requiresAuthority = false)]
-    public void CmdPlayerChange(bool isHost, GameCanvasPlayerData playerData)
+    public void CmdPlayerChange(bool isHost, n_LocalPlayerData.Root playerData)
     {
-        _playerData[isHost ? 0 : 1] = playerData;
+        _playerData[isHost ? 0 : 1].SetPlayerInfo(playerData);
     }
 
     /// <summary>
@@ -226,38 +278,36 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         _canvas_Manager.SetPlayerData(IsHost, data);
     }
 
+    /// <summary>
+    /// 所有客户端展示相同提示文本
+    /// </summary>
+    /// <param name="content">要展示的内容</param>
     [ClientRpc]
     public void RpcShowTipText(string content)
     {
         _canvas_Manager.ShowTipText(content);
     }
 
-    [ClientRpc]
-    public void RpcGameStart()
+    /// <summary>
+    /// 向指定客户端展示提示文本
+    /// </summary>
+    /// <param name="conn">要展示的内容</param>
+    /// <param name="content">指定客户端的连接</param>
+    [TargetRpc]
+    public void TargetShowTipText(NetworkConnection conn, string content)
     {
-
+        _canvas_Manager.ShowTipText(content);
     }
 
-    [ClientRpc]
-    public void RpcGameEnd()
+    /// <summary>
+    /// 切换指定玩家的准备按钮
+    /// </summary>
+    /// <param name="conn">指定的玩家</param>
+    /// <param name="isReady">是否准备</param>
+    [TargetRpc]
+    public void TargetSetPlayerReadyState(NetworkConnection conn, bool isReady)
     {
-
-    }
-
-    [ClientRpc]
-    public void RpcChangeControlButton(GameCanvasState state)
-    {
-        switch (state)
-        {
-            case GameCanvasState.WaitForReady:
-                {
-                    break;
-                }
-            case GameCanvasState.Gaming:
-                {
-                    break;
-                }
-        }
+        _canvas_Manager.SetReadyState(isReady);
     }
 
     /// <summary>
