@@ -1,20 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Mirror;
-using UnityEngine.UI;
-using System.Runtime.CompilerServices;
 
 public class GameCanvasPlayerManager : NetworkBehaviour
 {
-    private GameCanvasServerManager _manager;       //
+    private GameCanvasServerManager _manager;
 
     public bool IsHost => isServer & isClient;      //此客户端是否为房主
 
     public override void OnStartClient()
     {
         if (false == isLocalPlayer) return;
-        //
+
         _manager = GameObject.Find("Game_Canvas/ServerManager").GetComponent<GameCanvasServerManager>();
         //玩家控制和场景物体进行连接
         PlayerControlConnect();
@@ -23,14 +19,14 @@ public class GameCanvasPlayerManager : NetworkBehaviour
     public void Button_Start()
     {
         if (false == isLocalPlayer) return;
-        //
+        //向服务端发送玩家准备指令
         CmdPlayerReady(IsHost);
     }
 
     public void Button_Exit()
     {
         if (false == isLocalPlayer) return;
-        //
+        //向服务端发送玩家退出游戏指令
         CmdGameExit(IsHost);
         //客户端停止连接
         _manager.StopConnectClient(IsHost);
@@ -56,7 +52,7 @@ public class GameCanvasPlayerManager : NetworkBehaviour
     public void PutDice(int pos)
     {
         if (false == isLocalPlayer) return;
-
+        //向服务端发送在指定位置放置骰子指令
         _manager.CmdPutDice(pos);
     }
 
@@ -70,5 +66,4 @@ public class GameCanvasPlayerManager : NetworkBehaviour
         _manager.SetStartButtonDelegate(Button_Start);
         _manager.SetExitButtonDelegate(Button_Exit);
     }
-
 }
