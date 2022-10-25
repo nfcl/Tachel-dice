@@ -39,8 +39,8 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             //房间内玩家信息初始化
             _playerData = new GameCanvasPlayerData[2]
             {
-                null,       //null代表没有玩家
-                null,       //null代表没有玩家
+                new GameCanvasPlayerData(),
+                new GameCanvasPlayerData()
             };
             //创建新的游戏进程管理器
             _game_Manager = new GameCanvasGameManager();
@@ -50,7 +50,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         //移动相机至游戏界面
         _canvas_Manager.Goto_GameCanvas();
         //将新的玩家信息添加到服务端的_playerData
-        CmdPlayerChange(isServer, new GameCanvasPlayerData(Tool.JsonReader<n_LocalPlayerData.Root>("LocalPlayerData.json")));
+        CmdPlayerChange(isServer, Tool.JsonReader<n_LocalPlayerData.Root>("LocalPlayerData.json"));
         //在各个客户端重新绘制玩家信息
         CmdDrawPlayerInfo();
         //非主机玩家进入房间时与主机同步
