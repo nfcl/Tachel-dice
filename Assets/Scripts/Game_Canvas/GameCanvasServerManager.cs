@@ -61,11 +61,6 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         }
     }
 
-    private void OnServerDisconnect(NetworkConnection conn)
-    {
-
-    }
-
     /// <summary>
     /// 客户端与服务端停止连接
     /// </summary>
@@ -73,6 +68,25 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     {
         //移动相机至游戏界面
         _canvas_Manager.Return_MainCanvas();
+    }
+
+    /// <summary>
+    /// 当有客户端断开连接时会在服务端调用这个方法
+    /// </summary>
+    /// <param name="conn">断开的客户端的NetworkConnection</param>
+    private void OnServerDisconnect(NetworkConnection conn)
+    {
+        //服务端已关闭
+        //单此条件时会在以下情况同时出现时中出现错误:
+        //1.房主断开连接
+        if (false == NetworkClient.active) return;
+        //断开连接的是房主的客户端
+        //单此条件时会在以下情况同时出现时中出现错误:
+        //1.有其他玩家客户端连接到房主时
+        //2.房主断开连接
+        if (conn.connectionId == 0) return;
+        //condition : 非房主玩家退出游戏
+        StopConnectServer(false);
     }
 
     /// <summary>
@@ -173,8 +187,8 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             if (true == _game_Manager.IsGameEnd)
             {
 
+            }
         }
-    }
     }
 
     /// <summary>
@@ -297,7 +311,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     /// <param name="isReady">是否准备</param>
     [TargetRpc]
     public void TargetSetPlayerReadyState(NetworkConnection conn, bool isReady)
-                {
+    {
         _canvas_Manager.SetReadyState(isReady);
     }
 
