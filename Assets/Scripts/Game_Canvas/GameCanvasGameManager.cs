@@ -14,7 +14,7 @@ public class GameCanvasGameManager
     public int                          NextPutDiceValue        => _nextPutDiceValue;
     public int                          Player1Grade            => _lineGrades[0] + _lineGrades[1] + _lineGrades[2]; 
     public int                          Player2Grade            => _lineGrades[3] + _lineGrades[4] + _lineGrades[5];
-    public bool                         IsGameEnd               => _state == GameCanvasGameState.Player1Win || _state == GameCanvasGameState.Player2Win;
+    public bool                         IsGameEnd               => GameWin() != -1;
 
     public GameCanvasGameManager()
     {
@@ -53,6 +53,27 @@ public class GameCanvasGameManager
             _state = GameCanvasGameState.Player2Turn;
         }
     }
+
+    /// <summary>
+    /// 判断获胜玩家
+    /// </summary>
+    /// <returns>当游戏未结束时返回-1,否则返回0，1代表玩家1，2获胜</returns>
+    public int GameWin()
+    {
+        if (_state == GameCanvasGameState.Player1Win)
+        {
+            return 0;
+        }
+        else if (_state == GameCanvasGameState.Player2Win)
+        {
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
 
     /// <summary>
     /// <para/>切换回合
