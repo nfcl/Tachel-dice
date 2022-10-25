@@ -103,16 +103,56 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     [Server]
     public void StopConnectServer(bool isHost)
     {
-        if(true == isHost)
+        //清除玩家信息
+        //在所有客户端上重新绘制玩家信息
+        if (true == isHost)
         {
-            _playerData[0] = null;
+            _playerData[0].ClearPlayerInfo();
+            RpcDrawPlayerInfo(true, _playerData[0]);
         }
         else
         {
-            _playerData[1] = null;
+            _playerData[1].ClearPlayerInfo();
+            RpcDrawPlayerInfo(false, _playerData[1]);
         }
-        //在所有客户端上重新绘制玩家信息
-        RpcDrawPlayerInfo(isHost, null);
+    }
+
+    /// <summary>
+    /// 指定玩家准备状态切换
+    /// </summary>
+    /// <param name="isHost">指定的玩家</param>
+    [Server]
+    public void PlayerReady(bool isHost)
+    {
+        //切换服务端中的玩家准备状态
+        //切换客户端准备按钮的图片
+        if (true == isHost)
+        {
+            _playerData[0].ChangeReadyState();
+            TargetSetPlayerReadyState(NetworkServer.connections[0], _playerData[0].IsReady);
+        }
+        else
+        {
+            _playerData[1].ChangeReadyState();
+            TargetSetPlayerReadyState(NetworkServer.connections[1], _playerData[1].IsReady);
+        }
+        //计算已准备的人数
+        int ReadyPlayerNum = 0;
+        ReadyPlayerNum += (_playerData[0] is null || _playerData[0].IsReady) ? 0 : 1;
+        ReadyPlayerNum += (_playerData[1] is null || _playerData[1].IsReady) ? 0 : 1;
+        //判断是否都准备好了
+        if (2 != ReadyPlayerNum)
+        {
+            //更改提示信息为准备好的人数
+            RpcShowTipText($"当前已有\n{ReadyPlayerNum}/2\n个玩家已准备");
+        }
+        else
+        {
+            //隐藏准备按钮
+
+            //切换回合
+
+        }
     }
 
     /// <summary>
