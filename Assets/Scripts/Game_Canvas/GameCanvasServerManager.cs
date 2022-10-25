@@ -130,8 +130,11 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             //更新分数信息
             CmdUpdateGradeData();
             //检测是否结束游戏
+            if (true == _game_Manager.IsGameEnd)
+            {
 
         }
+    }
     }
 
     /// <summary>
