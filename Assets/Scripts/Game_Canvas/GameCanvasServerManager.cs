@@ -229,38 +229,36 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         _canvas_Manager.SetPlayerData(IsHost, data);
     }
 
+    /// <summary>
+    /// 所有客户端展示相同提示文本
+    /// </summary>
+    /// <param name="content">要展示的内容</param>
     [ClientRpc]
     public void RpcShowTipText(string content)
     {
         _canvas_Manager.ShowTipText(content);
     }
 
-    [ClientRpc]
-    public void RpcGameStart()
+    /// <summary>
+    /// 向指定客户端展示提示文本
+    /// </summary>
+    /// <param name="conn">要展示的内容</param>
+    /// <param name="content">指定客户端的连接</param>
+    [TargetRpc]
+    public void TargetShowTipText(NetworkConnection conn, string content)
     {
-
+        _canvas_Manager.ShowTipText(content);
     }
 
-    [ClientRpc]
-    public void RpcGameEnd()
-    {
-
-    }
-
-    [ClientRpc]
-    public void RpcChangeControlButton(GameCanvasState state)
-    {
-        switch (state)
-        {
-            case GameCanvasState.WaitForReady:
+    /// <summary>
+    /// 切换指定玩家的准备按钮
+    /// </summary>
+    /// <param name="conn">指定的玩家</param>
+    /// <param name="isReady">是否准备</param>
+    [TargetRpc]
+    public void TargetSetPlayerReadyState(NetworkConnection conn, bool isReady)
                 {
-                    break;
-                }
-            case GameCanvasState.Gaming:
-                {
-                    break;
-                }
-        }
+        _canvas_Manager.SetReadyState(isReady);
     }
 
     /// <summary>
