@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Mirror;
 using Game_Canvas;
-using System;
 
 /// <summary>
 /// 服务端的游戏管理器
@@ -26,6 +25,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     /// 游戏进程管理器
     /// </summary>
     private GameCanvasGameManager       _game_Manager;
+
     /// <summary>
     /// 客户端连接到服务端
     /// </summary>
