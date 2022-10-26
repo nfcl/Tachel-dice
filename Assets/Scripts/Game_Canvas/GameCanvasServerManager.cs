@@ -165,7 +165,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             //隐藏准备按钮
             RpcSetReadyButtonVisible(false);
             //切换回合
-
+            _game_Manager.GameStart(true);
         }
     }
 
@@ -189,7 +189,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
                 //显示准备按钮
                 RpcSetReadyButtonVisible(true);
                 //提示文本显示为"{获胜玩家}胜利！"
-
+                RpcShowTipText($"玩家{_game_Manager.GameWin()}胜利！");
             }
         }
     }
@@ -286,6 +286,10 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         _canvas_Manager.SetPlayerData(IsHost, data);
     }
 
+    /// <summary>
+    /// 客户端设置准备按钮是否可见
+    /// </summary>
+    /// <param name="isVisible">是否可见</param>
     [ClientRpc]
     public void RpcSetReadyButtonVisible(bool isVisible)
     {
