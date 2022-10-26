@@ -163,7 +163,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         else
         {
             //隐藏准备按钮
-
+            RpcSetReadyButtonVisible(false);
             //切换回合
 
         }
@@ -186,6 +186,9 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             //检测是否结束游戏
             if (true == _game_Manager.IsGameEnd)
             {
+                //显示准备按钮
+                RpcSetReadyButtonVisible(true);
+                //提示文本显示为"{获胜玩家}胜利！"
 
             }
         }
@@ -281,6 +284,12 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     public void RpcDrawPlayerInfo(bool IsHost, GameCanvasPlayerData data)
     {
         _canvas_Manager.SetPlayerData(IsHost, data);
+    }
+
+    [ClientRpc]
+    public void RpcSetReadyButtonVisible(bool isVisible)
+    {
+        _canvas_Manager.SetReadyButtonVisible(isVisible);
     }
 
     /// <summary>

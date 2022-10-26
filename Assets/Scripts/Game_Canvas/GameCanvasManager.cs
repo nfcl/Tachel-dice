@@ -144,7 +144,16 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// <param name="content">显示内容</param>
     public void ShowTipText(string content)
     {
-        _controlButtons.Text_Tip.text = content;
+        _controlButtons.SetTipTextContent(content);
+    }
+
+    /// <summary>
+    /// 设置准备按钮是否可见
+    /// </summary>
+    /// <param name="isVisible">是否可见</param>
+    public void SetReadyButtonVisible(bool isVisible)
+    {
+        _controlButtons.SetReadyButtonVisible(isVisible);
     }
 
     /// <summary>
@@ -161,12 +170,22 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// </summary>
     private class ControlButtons
     {
-        private Button      _button_Ready;      //准备按钮
-        private Button      _button_Exit;       //退出按钮
-        private Image       _image_Ready;       //准备按钮显示图片
-        private Text        _text_Tip;          //提示文本框
-
-        public Text         Text_Tip => _text_Tip;
+        /// <summary>
+        /// 准备按钮
+        /// </summary>
+        private Button      _button_Ready;
+        /// <summary>
+        /// 退出按钮
+        /// </summary>
+        private Button      _button_Exit;
+        /// <summary>
+        /// 准备按钮显示图片
+        /// </summary>
+        private Image       _image_Ready;
+        /// <summary>
+        /// 提示文本框
+        /// </summary>
+        private Text        _text_Tip;          
 
         public ControlButtons(Transform source)
         {
@@ -174,7 +193,6 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
             _button_Exit    = source.Find("Exit").GetComponent<Button>();
             _text_Tip       = source.Find("Tip").GetComponent<Text>();
         }
-
 
         /// <summary>
         /// 监听开始按钮的点击事件
@@ -214,6 +232,24 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
             {
                 _image_Ready.sprite = Resources.Load<Sprite>("Game_Scene/sprite/ReadyButton");
             }
+        }
+
+        /// <summary>
+        /// 设置提示文本显示的内容
+        /// </summary>
+        /// <param name="content">要显示的内容</param>
+        public void SetTipTextContent(string content)
+        {
+            _text_Tip.text = content;
+        }
+
+        /// <summary>
+        /// 设置准备按钮是否可见
+        /// </summary>
+        /// <param name="isVisible">是否可见</param>
+        public void SetReadyButtonVisible(bool isVisible)
+        {
+            _button_Ready.gameObject.SetActive(isVisible);
         }
     }
 
