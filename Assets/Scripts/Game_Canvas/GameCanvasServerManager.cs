@@ -342,17 +342,6 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
     }
 
     /// <summary>
-    /// 向指定客户端展示提示文本
-    /// </summary>
-    /// <param name="conn">要展示的内容</param>
-    /// <param name="content">指定客户端的连接</param>
-    [TargetRpc]
-    public void TargetShowTipText(NetworkConnection conn, string content)
-    {
-        _canvas_Manager.ShowTipText(content);
-    }
-
-    /// <summary>
     /// 切换指定玩家的准备按钮
     /// </summary>
     /// <param name="conn">指定的玩家</param>
