@@ -56,13 +56,10 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
         CmdDrawPlayerInfo();
         //场景初始化
         _canvas_Manager.SceneInit();
-        //非主机玩家进入房间时与主机同步
-        if (false == isServer)
-        {
+        //更新游戏数据显示信息
             CmdUpdateDiceData();
             CmdUpdateGradeData();
         }
-    }
 
     /// <summary>
     /// 客户端与服务端停止连接
@@ -88,8 +85,28 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
         //1.有其他玩家客户端连接到房主时
         //2.房主断开连接
         if (conn.connectionId == 0) return;
-        //condition : 非房主玩家退出游戏
-        StopConnectServer(false);
+        //****************************************
+        //** condition : 非房主玩家单独退出游戏 **
+        //****************************************
+        //如果当前正在游戏中需要结束游戏
+        if (false == _game_Manager.IsGameEnd)
+        {
+            //服务端游戏数据初始化
+            _game_Manager.Init();
+            //更新游戏数据显示信息
+            CmdUpdateDiceData();
+            CmdUpdateGradeData();
+            //显示准备按钮
+            RpcSetReadyButtonVisible(true);
+            //改变房主的准备状态
+            _playerData[0].ChangeReadyState(false);
+        }
+        //提示玩家离开
+        RpcShowTipText($"玩家1\n{_playerData[1].Name}\n离开");
+        //清除非房主玩家数据
+        _playerData[1].ClearPlayerInfo();
+        //更新房主的非房主玩家信息
+        RpcDrawPlayerInfo(true, _playerData[1]);
     }
 
     /// <summary>
@@ -108,29 +125,6 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
         else
         {
             _networkManager.StopClient();
-        }
-    }
-
-    /// <summary>
-    /// <para/>当前客户端停止网络连接
-    /// <para/>(服务端调用)
-    /// <para/>用于提前通知服务端客户端停止连接
-    /// </summary>
-    /// <param name="isHost">是房主调用</param>
-    [Server]
-    public void StopConnectServer(bool isHost)
-    {
-        //清除玩家信息
-        //在所有客户端上重新绘制玩家信息 
-        if (true == isHost)
-        {
-            _playerData[0].ClearPlayerInfo();
-            RpcDrawPlayerInfo(true, _playerData[0]);
-        }
-        else
-        {
-            _playerData[1].ClearPlayerInfo();
-            RpcDrawPlayerInfo(false, _playerData[1]);
         }
     }
 

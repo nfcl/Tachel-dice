@@ -35,8 +35,6 @@ public class GameCanvasPlayerManager : NetworkBehaviour
     public void Button_Exit()
     {
         if (false == isLocalPlayer) return;
-        //向服务端发送玩家退出游戏指令
-        CmdGameExit(IsHost);
         //客户端停止连接
         _serverManager.StopConnectClient(IsHost);
     }
@@ -70,16 +68,5 @@ public class GameCanvasPlayerManager : NetworkBehaviour
     public void CmdPlayerReady(bool isHost)
     {
         _serverManager.PlayerReady(isHost);
-    }
-
-    /// <summary>
-    /// 玩家向服务端发出退出游戏的命令
-    /// </summary>
-    /// <param name="isHost">是否是房主</param>
-    [Command]
-    public void CmdGameExit(bool isHost)
-    {
-        //通知服务端客户端停止连接
-        _serverManager.StopConnectServer(isHost);
     }
 }
