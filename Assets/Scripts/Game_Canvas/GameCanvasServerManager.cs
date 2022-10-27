@@ -134,6 +134,10 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
         }
     }
 
+    /// <summary>
+    /// 服务端debuglog输出方法
+    /// </summary>
+    /// <param name="content"></param>
     [Command(requiresAuthority =false)]
     public void CmdDebug(string content)
     {
@@ -197,6 +201,8 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
             }
             //更新分数信息
             CmdUpdateGradeData();
+            //更新下一个骰子
+            RpcSetNextDiceValue(_game_Manager.NextPutDiceValue);
             //检测是否结束游戏
             if (true == _game_Manager.IsGameEnd)
             {
@@ -204,6 +210,8 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
                 RpcSetReadyButtonVisible(true);
                 //提示文本显示为"{获胜玩家}胜利！"
                 RpcShowTipText($"玩家{_game_Manager.GameWin()}胜利！");
+                //隐藏下一个骰子的显示
+                RpcSetNextDiceValue(0);
             }
         }
     }
@@ -267,6 +275,16 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
     public void RpcSetDiceValue(int pos, int value)
     {
         _canvas_Manager.SetDiceValue(pos, value);
+    }
+
+    /// <summary>
+    /// <para/>设置下一个要放置的骰子点数
+    /// </summary>
+    /// <param name="value">要放置的点数,0为隐藏</param>
+    [ClientRpc]
+    public void RpcSetNextDiceValue(int value)
+    {
+        _canvas_Manager.SetNextDiveValue(value);
     }
 
     /// <summary>
@@ -343,16 +361,25 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
             _canvas_Manager.SetReadyState(isReady);
     }
 
+    /// <summary>
+    /// 设置骰子放置事件
+    /// </summary>
     public void SetPutDiceDelegate(bool isHost, DiceButtonControlDel del)
     {
         _canvas_Manager.SetPutDiceDelegate(isHost, del);
     }
 
+    /// <summary>
+    /// 设置开始按钮事件
+    /// </summary>
     public void SetStartButtonDelegate(StartButtonDel del)
     {
         _canvas_Manager.SetStartButtonDelegate(del);
     }
 
+    /// <summary>
+    /// 设置退出按钮事件
+    /// </summary>
     public void SetExitButtonDelegate(ExitButtonDel del)
     {
         _canvas_Manager.SetExitButtonDelegate(del);
