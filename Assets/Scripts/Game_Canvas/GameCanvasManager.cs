@@ -57,6 +57,15 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     }
 
     /// <summary>
+    /// 场景初始化
+    /// </summary>
+    public void SceneInit()
+    {
+        ShowTipText("当前已有\n0/2\n个玩家已准备");
+        SetReadyButtonVisible(true);
+    }
+
+    /// <summary>
     /// 设置指定位置的骰子值
     /// </summary>
     /// <param name="pos">指定位置</param>
@@ -115,9 +124,9 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
     /// 骰子放置按钮组点击委托设置
     /// </summary>
     /// <param name="del">要设置的委托</param>
-    public void SetPutDiceDelegate(DiceButtonControlDel del)
+    public void SetPutDiceDelegate(bool isHost,DiceButtonControlDel del)
     {
-        _diceBoardControl.SetPutDiceDelegate(del);
+        _diceBoardControl.SetPutDiceDelegate(isHost, del);
     }
 
     /// <summary>
@@ -191,6 +200,7 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         {
             _button_Ready   = source.Find("Start").GetComponent<Button>();
             _button_Exit    = source.Find("Exit").GetComponent<Button>();
+            _image_Ready    = source.Find("Start").GetComponent<Image>();
             _text_Tip       = source.Find("Tip").GetComponent<Text>();
         }
 
@@ -354,9 +364,13 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
                 _dice_value2Sprite[i] = Resources.Load<Sprite>($"Game_Scene/sprite/Dice_{i}");
             }
             _lineGrade_Text = new Text[6];
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < 3; ++i)
             {
-                _lineGrade_Text[i] = source.Find($"").GetComponent<Text>();
+                _lineGrade_Text[i] = source.Find($"Player1/Grade{i + 1}").GetComponent<Text>();
+            }
+            for (int i = 3; i < 6; ++i)
+            {
+                _lineGrade_Text[i] = source.Find($"Player2/Grade{i - 2}").GetComponent<Text>();
             }
             _grade = new Text[2]
             {
@@ -370,11 +384,21 @@ public class GameCanvasManager : MonoBehaviour, IGameCanvasPlayerControlConnect
         /// </summary>
         /// <param name="del">点击委托</param>
         /// <param name="pos">设置的点击</param>
-        public void SetPutDiceDelegate(DiceButtonControlDel del)
+        public void SetPutDiceDelegate(bool isHost,DiceButtonControlDel del)
         {
-            for (int i = 0; i < 17; ++i)
+            if (isHost)
             {
-                __setPutDiceDelegate(del, i);
+                for (int i = 0; i < 9; ++i)
+                {
+                    __setPutDiceDelegate(del, i);
+                }
+            }
+            else
+            {
+                for (int i = 9; i < 18; ++i)
+                {
+                    __setPutDiceDelegate(del, i);
+                }
             }
         }
 

@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
 using Mirror;
 using Game_Canvas;
+using Unity.Collections.LowLevel.Unsafe;
 
 /// <summary>
 /// 服务端的游戏管理器
 /// </summary>
-public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerControlConnect
+public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControlConnect
 {
     /// <summary>
-    /// <para/>网络管理器
+    /// 网络管理器
     /// </summary>
     [SerializeField]
     private NetworkManager              _networkManager;
@@ -53,6 +54,8 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         CmdPlayerChange(isServer, Tool.JsonReader<n_LocalPlayerData.Root>("LocalPlayerData.json"));
         //在各个客户端重新绘制玩家信息
         CmdDrawPlayerInfo();
+        //场景初始化
+        _canvas_Manager.SceneInit();
         //非主机玩家进入房间时与主机同步
         if (false == isServer)
         {
@@ -118,7 +121,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     public void StopConnectServer(bool isHost)
     {
         //清除玩家信息
-        //在所有客户端上重新绘制玩家信息
+        //在所有客户端上重新绘制玩家信息 
         if (true == isHost)
         {
             _playerData[0].ClearPlayerInfo();
@@ -129,6 +132,12 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             _playerData[1].ClearPlayerInfo();
             RpcDrawPlayerInfo(false, _playerData[1]);
         }
+    }
+
+    [Command(requiresAuthority =false)]
+    public void CmdDebug(string content)
+    {
+        Debug.Log(content);
     }
 
     /// <summary>
@@ -143,17 +152,17 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         if (true == isHost)
         {
             _playerData[0].ChangeReadyState();
-            TargetSetPlayerReadyState(NetworkServer.connections[0], _playerData[0].IsReady);
+            SetPlayerReadyState(true, _playerData[0].IsReady);
         }
         else
         {
             _playerData[1].ChangeReadyState();
-            TargetSetPlayerReadyState(NetworkServer.connections[1], _playerData[1].IsReady);
+            SetPlayerReadyState(false, _playerData[1].IsReady);
         }
         //计算已准备的人数
         int ReadyPlayerNum = 0;
-        ReadyPlayerNum += (_playerData[0] is null || _playerData[0].IsReady) ? 0 : 1;
-        ReadyPlayerNum += (_playerData[1] is null || _playerData[1].IsReady) ? 0 : 1;
+        ReadyPlayerNum += (_playerData[0] is null || false == _playerData[0].IsReady) ? 0 : 1;
+        ReadyPlayerNum += (_playerData[1] is null || false == _playerData[1].IsReady) ? 0 : 1;
         //判断是否都准备好了
         if (2 != ReadyPlayerNum)
         {
@@ -166,6 +175,8 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
             RpcSetReadyButtonVisible(false);
             //切换回合
             _game_Manager.GameStart(true);
+            //更改提示信息游戏开始
+            RpcShowTipText("游戏开始");
         }
     }
 
@@ -180,7 +191,10 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         if (true == _game_Manager.PutDice(pos))
         {
             //更新骰子放置信息
-            CmdUpdateDiceData();
+            for (int i = 0; i < 18; ++i)
+            {
+                RpcSetDiceValue(i, _game_Manager.DiceSlots[i]);
+            }
             //更新分数信息
             CmdUpdateGradeData();
             //检测是否结束游戏
@@ -203,7 +217,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
         //更新双方骰子放置信息
         for (int i = 0; i < 18; ++i)
         {
-            RpcSetDiceValue(i, _game_Manager.DiceSlots[i]);
+            RpcSetDiceValue(i,  _game_Manager.DiceSlots[i]);
         }
     }
 
@@ -263,7 +277,7 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     [ClientRpc]
     public void RpcSetDiceLineGrade(int linePos,int value)
     {
-        _canvas_Manager.SetDiceValue(linePos, value);
+        _canvas_Manager.SetDiceLineGrade(linePos, value);
     }
 
     /// <summary>
@@ -322,34 +336,23 @@ public class GameCanvasServerManager : NetworkBehaviour, IGameCanvasPlayerContro
     /// </summary>
     /// <param name="conn">指定的玩家</param>
     /// <param name="isReady">是否准备</param>
-    [TargetRpc]
-    public void TargetSetPlayerReadyState(NetworkConnection conn, bool isReady)
+    [ClientRpc]
+    public void SetPlayerReadyState(bool isHost, bool isReady)
     {
-        _canvas_Manager.SetReadyState(isReady);
+        if (false == (true == isHost ^ true == isServer))
+            _canvas_Manager.SetReadyState(isReady);
     }
 
-    /// <summary>
-    /// 骰子放置按钮组点击委托设置
-    /// </summary>
-    /// <param name="del">要设置的委托</param>
-    public void SetPutDiceDelegate(DiceButtonControlDel del)
+    public void SetPutDiceDelegate(bool isHost, DiceButtonControlDel del)
     {
-        _canvas_Manager.SetPutDiceDelegate(del);
+        _canvas_Manager.SetPutDiceDelegate(isHost, del);
     }
 
-    /// <summary>
-    /// 开始按钮点击委托设置
-    /// </summary>
-    /// <param name="del">要设置的委托</param>
     public void SetStartButtonDelegate(StartButtonDel del)
     {
         _canvas_Manager.SetStartButtonDelegate(del);
     }
 
-    /// <summary>
-    /// 退出按钮点击委托设置
-    /// </summary>
-    /// <param name="del">要设置的委托</param>
     public void SetExitButtonDelegate(ExitButtonDel del)
     {
         _canvas_Manager.SetExitButtonDelegate(del);

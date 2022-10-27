@@ -230,7 +230,10 @@ public class GameCanvasGameManager
         //计算列分数
         for (__CircArg_i = 0; __CircArg_i < 7; ++__CircArg_i)
         {
-            _lineGrades[linePos] += (__CircArg_i + __CircArg_i) * _Calculate_lineGrades_ValueNum[__CircArg_i];
+            if (1 == _Calculate_lineGrades_ValueNum[__CircArg_i])
+                _lineGrades[linePos] += __CircArg_i;
+            else
+                _lineGrades[linePos] += (__CircArg_i + __CircArg_i) * _Calculate_lineGrades_ValueNum[__CircArg_i];
         }
     }
 

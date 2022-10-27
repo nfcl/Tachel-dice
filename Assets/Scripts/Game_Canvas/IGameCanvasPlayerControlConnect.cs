@@ -16,7 +16,7 @@
         /// <summary>
         /// 设置骰子放置事件
         /// </summary>
-        void SetPutDiceDelegate(DiceButtonControlDel del);
+        void SetPutDiceDelegate(bool isHost, DiceButtonControlDel del);
         /// <summary>
         /// 设置开始按钮事件
         /// </summary>
