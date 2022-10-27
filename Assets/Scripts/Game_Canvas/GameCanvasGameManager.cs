@@ -68,6 +68,26 @@ public class GameCanvasGameManager
     }
 
     /// <summary>
+    /// 用于判断是谁的回合
+    /// </summary>
+    /// <returns>-1代表游戏未开始,0/1代表对应玩家回合</returns>
+    public int WhoTurn()
+    {
+        if(_state == GameCanvasGameState.Player1Turn)
+        {
+            return 0;
+        }
+        else if (_state == GameCanvasGameState.Player2Turn)
+        {
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    /// <summary>
     /// 游戏开始
     /// </summary>
     /// <param name="Player1Start">是玩家1先手</param>
