@@ -4,17 +4,47 @@
 /// </summary>
 public class GameCanvasGameManager
 {
-    private int                         _nextPutDiceValue;          //下一个放置的骰子       
-    private int[]                       _diceSlots;                 //骰子槽位的值,0表示没有骰子  
-    private int[]                       _lineGrades;                //列分数
-    private GameCanvasGameState         _state;                     //游戏状态
+    /// <summary>
+    /// 下一个放置的骰子点数
+    /// </summary>
+    private int                     _nextPutDiceValue;
+    /// <summary>
+    /// 骰子槽位的值,0表示没有骰子  
+    /// </summary>
+    private int[]                   _diceSlots;
+    /// <summary>
+    /// 列分数
+    /// </summary>
+    private int[]                   _lineGrades;                
+    /// <summary>
+    /// 游戏状态
+    /// </summary>
+    private GameCanvasGameState     _state;
 
-    public int[]                        DiceSlots               => _diceSlots;
-    public int[]                        LineGrades              => _lineGrades;
-    public int                          NextPutDiceValue        => _nextPutDiceValue;
-    public int                          Player1Grade            => _lineGrades[0] + _lineGrades[1] + _lineGrades[2]; 
-    public int                          Player2Grade            => _lineGrades[3] + _lineGrades[4] + _lineGrades[5];
-    public bool                         IsGameEnd               => GameWin() != -1;
+    /// <summary>
+    /// 骰子槽位的放置的点数
+    /// </summary>
+    public int[] DiceSlots          { get { return _diceSlots; } }
+    /// <summary>
+    /// 列分数
+    /// </summary>
+    public int[] LineGrades         { get { return _lineGrades; } }
+    /// <summary>
+    /// 下一个要放置的点数
+    /// </summary>
+    public int NextPutDiceValue     { get { return _nextPutDiceValue; } }
+    /// <summary>
+    /// 玩家1的总分
+    /// </summary>
+    public int Player1Grade         { get { return _lineGrades[0] + _lineGrades[1] + _lineGrades[2]; } }
+    /// <summary>
+    /// 玩家2的总分
+    /// </summary>
+    public int Player2Grade         { get { return _lineGrades[3] + _lineGrades[4] + _lineGrades[5]; } }
+    /// <summary>
+    /// 游戏是否结束
+    /// </summary>
+    public bool IsGameEnd           { get { return GameWin() != -1; } }
 
     public GameCanvasGameManager()
     {
