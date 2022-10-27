@@ -209,6 +209,12 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
             //检测是否结束游戏
             if (true == _game_Manager.IsGameEnd)
             {
+                //更改服务端玩家准备状态
+                _playerData[0].ChangeReadyState(false);
+                _playerData[1].ChangeReadyState(false);
+                //将双方玩家的准备按钮显示为准备
+                RpcSetPlayerReadyState(true, false);
+                RpcSetPlayerReadyState(false, false);
                 //显示准备按钮
                 RpcSetReadyButtonVisible(true);
                 //提示文本显示为"{获胜玩家}胜利！"
