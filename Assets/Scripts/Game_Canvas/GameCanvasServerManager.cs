@@ -57,9 +57,9 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
         //场景初始化
         _canvas_Manager.SceneInit();
         //更新游戏数据显示信息
-            CmdUpdateDiceData();
-            CmdUpdateGradeData();
-        }
+        CmdUpdateDiceData();
+        CmdUpdateGradeData();
+    }
 
     /// <summary>
     /// 客户端与服务端停止连接
@@ -182,8 +182,10 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
             RpcSetReadyButtonVisible(false);
             //切换回合
             _game_Manager.GameStart(true);
-            //更改提示信息游戏开始
-            RpcShowTipText("游戏开始");
+            //更改提示信息为当前玩家回合
+            RpcShowTipText($"当前是玩家{_game_Manager.WhoTurn()}\n{_playerData[_game_Manager.WhoTurn()].Name}\n的回合");
+            //显示下一个骰子
+            RpcSetNextDiceValue(_game_Manager.NextPutDiceValue);
         }
     }
 
@@ -206,6 +208,8 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
             CmdUpdateGradeData();
             //更新下一个骰子
             RpcSetNextDiceValue(_game_Manager.NextPutDiceValue);
+            //更改提示信息为当前玩家回合
+            RpcShowTipText($"当前是玩家{_game_Manager.WhoTurn()}\n{_playerData[_game_Manager.WhoTurn()].Name}\n的回合");
             //检测是否结束游戏
             if (true == _game_Manager.IsGameEnd)
             {
