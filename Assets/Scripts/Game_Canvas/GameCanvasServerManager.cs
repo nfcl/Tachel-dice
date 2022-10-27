@@ -145,6 +145,15 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
     [Server]
     public void PlayerReady(bool isHost)
     {
+        //检测是否还在游戏结束状态
+        if (true == _game_Manager.IsGameEnd)
+        {
+            //服务端游戏数据初始化
+            _game_Manager.Init();
+            //重新绘制服务端骰子和分数的显示
+            CmdUpdateDiceData();
+            CmdUpdateGradeData();
+        }
         //切换服务端中的玩家准备状态
         //切换客户端准备按钮的图片
         if (true == isHost)
