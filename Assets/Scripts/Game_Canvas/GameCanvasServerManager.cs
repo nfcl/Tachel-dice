@@ -159,12 +159,12 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
         if (true == isHost)
         {
             _playerData[0].ChangeReadyState();
-            SetPlayerReadyState(true, _playerData[0].IsReady);
+            RpcSetPlayerReadyState(true, _playerData[0].IsReady);
         }
         else
         {
             _playerData[1].ChangeReadyState();
-            SetPlayerReadyState(false, _playerData[1].IsReady);
+            RpcSetPlayerReadyState(false, _playerData[1].IsReady);
         }
         //计算已准备的人数
         int ReadyPlayerNum = 0;
@@ -347,7 +347,7 @@ public class GameCanvasServerManager : NetworkBehaviour,IGameCanvasPlayerControl
     /// <param name="conn">指定的玩家</param>
     /// <param name="isReady">是否准备</param>
     [ClientRpc]
-    public void SetPlayerReadyState(bool isHost, bool isReady)
+    public void RpcSetPlayerReadyState(bool isHost, bool isReady)
     {
         if (false == (true == isHost ^ true == isServer))
             _canvas_Manager.SetReadyState(isReady);
